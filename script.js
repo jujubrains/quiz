@@ -86,12 +86,15 @@ startButton.addEventListener("click",function() {
   button4.textContent = "4. "+questions[i].choices[3];
   button4.className = "button";
   document.body.append(button4);
+  console.log(document.querySelectorAll(".button"))
 });
 
+document.getElementByClass("button").addEventListener("click", clickAnswer);
+
 function clickAnswer() {
-  getElementByClass("button").addEventListener("click",function(event) {
+  console.log("clicked an answer")
     event.preventDefault();
-    if (event.target.textContent=questions[i].answer) {
+    if (event.target.textContent===questions[i].answer) {
           i++;
           displayQuest();
           displayChoices();
@@ -99,9 +102,10 @@ function clickAnswer() {
     else{
           gameTimer-10;
     }
-  })
 }
 
 console.log(countdownDisplay);
 console.log(questions[0].title);
 console.log(startButton);
+console.log(questions[1].answer);
+
