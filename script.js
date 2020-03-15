@@ -109,3 +109,30 @@ console.log(questions[0].title);
 console.log(startButton);
 console.log(questions[1].answer);
 
+function printScores() {
+
+  var highscores = JSON.parse(window.localStorage.getItem("scores")) || [];
+
+
+  highscores.sort(function(a, b) {
+    return b.score - a.score;
+  });
+
+  highscores.forEach(function(score) {
+    var liTag = document.createElement("li");
+    liTag.textContent = score.initials + " - " + score.score;
+
+    var olEl = document.getElementById("scores");
+    olEl.appendChild(liTag);
+  });
+}
+
+function clearHighscores() {
+  window.localStorage.removeItem("scores");
+  window.location.reload();
+}
+
+document.getElementById("clear").onclick = clearHighscores;
+
+// run function when page loads
+printScores();
