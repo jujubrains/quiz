@@ -61,61 +61,41 @@ function startQuiz() {
 
   timerEl.textContent = time;
 
-  getQuestion();
+  displayQuest();
 }
-
 
 function displayQuest() {
   var currentQuestion = questions[currentQuestionIndex];
   var titleEl = document.getElementById("question-title");
   titleEl.textContent = currentQuestion.title;
-
   choicesEl.innerHTML = "";
   currentQuestion.choices.forEach(function(choice, i) {
     var choiceNode = document.createElement("button");
     choiceNode.setAttribute("class", "choice");
     choiceNode.setAttribute("value", choice);
     choiceNode.textContent = i + 1 + ". " + choice;
-
     choiceNode.onclick = questionClick;
     choicesEl.appendChild(choiceNode);
   });
 }
 
 function clickQuestion() {
-  // check if user guessed wrong
   if (this.value !== questions[currentQuestionIndex].answer) {
-    // penalize time
     time -= 15;
-
     if (time < 0) {
       time = 0;
     }
-
-    // display new time on page
     timerEl.textContent = time;
-
-    // play "wrong" sound effect
-    sfxWrong.play();
-
     feedbackEl.textContent = "Wrong!";
   } else {
-    // play "right" sound effect
-    sfxRight.play();
-
     feedbackEl.textContent = "Correct!";
   }
 
-  // flash right/wrong feedback on page for half a second
   feedbackEl.setAttribute("class", "feedback");
   setTimeout(function() {
     feedbackEl.setAttribute("class", "feedback hide");
   }, 1000);
-
-  // move to next question
   currentQuestionIndex++;
-
-  // check if we've run out of questions
   if (currentQuestionIndex === questions.length) {
     end();
   } else {
@@ -131,21 +111,6 @@ function end() {
   var finalScoreEl = document.getElementById("final-score");
   finalScoreEl.textContent = time;
   questionsEl.setAttribute("class", "hide");
-}
-
-document.getElementByClass("button").addEventListener("click", clickAnswer);
-
-function clickAnswer() {
-  console.log("clicked an answer")
-    event.preventDefault();
-    if (event.target.textContent===questions[i].answer) {
-          i++;
-          displayQuest();
-          displayChoices();
-    }
-    else{
-          gameTimer-10;
-    }
 }
 
 function highscore() {
@@ -170,6 +135,12 @@ function scoreListener(event) {
     highscore();
   }
 }
+submitBtn.onclick = highscore;
+
+startBtn.onclick = startQuiz;
+
+initialsEl.onkeyup = scoreListener;
+
 console.log(countdownDisplay);
 console.log(questions[0].title);
 console.log(startButton);
@@ -200,5 +171,4 @@ function clearHighscores() {
 
 document.getElementById("clear").onclick = clearHighscores;
 
-// run function when page loads
 printScores();
