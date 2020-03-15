@@ -1,13 +1,14 @@
-
-var countdownDisplay = document.getElementById("countdown");
-var startButton = document.getElementById("start");
-var displayQuestionEl = document.getElementById("title");
+var questionsEl = document.getElementById("questions");
+var timerEl = document.getElementById("time");
+var choicesEl = document.getElementById("choices");
+var submitBtn = document.getElementById("submit");
+var startBtn = document.getElementById("start");
+var initialsEl = document.getElementById("initials");
+var feedbackEl = document.getElementById("feedback");
 var gameTimer = 100;
-var button1;
-var button2;
-var button3;
-var button4;
+var timerId;
 var i=0;
+
 
 var questions = [
   {
@@ -51,43 +52,86 @@ function timer() {
   }, 1000);
 }
 
+function startQuiz() {
+  var startScreenEl = document.getElementById("start-screen");
+  startScreenEl.setAttribute("class", "hide");
+  questionsEl.removeAttribute("class");
+
+  timerId = setInterval(clockTick, 1000);
+
+  timerEl.textContent = time;
+
+  getQuestion();
+}
+
+
 function displayQuest() {
-  displayQuestionEl.textContent=questions[i].title;
+  var currentQuestion = questions[currentQuestionIndex];
+  var titleEl = document.getElementById("question-title");
+  titleEl.textContent = currentQuestion.title;
+
+  choicesEl.innerHTML = "";
+  currentQuestion.choices.forEach(function(choice, i) {
+    var choiceNode = document.createElement("button");
+    choiceNode.setAttribute("class", "choice");
+    choiceNode.setAttribute("value", choice);
+    choiceNode.textContent = i + 1 + ". " + choice;
+
+    choiceNode.onclick = questionClick;
+    choicesEl.appendChild(choiceNode);
+  });
 }
 
-function displayChoices() {
-  button1.textContent = "1. "+questions[i].choices[0];
-  button2.textContent = "2. "+questions[i].choices[1];
-  button3.textContent = "3. "+questions[i].choices[2];
-  button4.textContent = "4. "+questions[i].choices[3];
+function clickQuestion() {
+  // check if user guessed wrong
+  if (this.value !== questions[currentQuestionIndex].answer) {
+    // penalize time
+    time -= 15;
+
+    if (time < 0) {
+      time = 0;
+    }
+
+    // display new time on page
+    timerEl.textContent = time;
+
+    // play "wrong" sound effect
+    sfxWrong.play();
+
+    feedbackEl.textContent = "Wrong!";
+  } else {
+    // play "right" sound effect
+    sfxRight.play();
+
+    feedbackEl.textContent = "Correct!";
+  }
+
+  // flash right/wrong feedback on page for half a second
+  feedbackEl.setAttribute("class", "feedback");
+  setTimeout(function() {
+    feedbackEl.setAttribute("class", "feedback hide");
+  }, 1000);
+
+  // move to next question
+  currentQuestionIndex++;
+
+  // check if we've run out of questions
+  if (currentQuestionIndex === questions.length) {
+    end();
+  } else {
+    displayQuest();
+  }
 }
 
-startButton.addEventListener("click",function() {
-  event.preventDefault();
-  countdownDisplay.textContent=gameTimer;
-  timer();
-  displayQuest();
-  startButton.setAttribute("style","display:none");
-  document.getElementById("text").setAttribute("style","display:none");
+function end() {
 
-  button1 = document.createElement("button");
-  button1.textContent = "1. "+questions[i].choices[0];
-  button1.className = "button";
-  document.body.append(button1);
-  button2 = document.createElement("button");
-  button2.textContent = "2. "+questions[i].choices[1];
-  button2.className = "button";
-  document.body.append(button2);
-  button3 = document.createElement("button");
-  button3.textContent = "3. "+questions[i].choices[2];
-  button3.className = "button";
-  document.body.append(button3);
-  button4 = document.createElement("button");
-  button4.textContent = "4. "+questions[i].choices[3];
-  button4.className = "button";
-  document.body.append(button4);
-  console.log(document.querySelectorAll(".button"))
-});
+  clearInterval(timerId);
+  var endScreenEl = document.getElementById("end-screen");
+  endScreenEl.removeAttribute("class");
+  var finalScoreEl = document.getElementById("final-score");
+  finalScoreEl.textContent = time;
+  questionsEl.setAttribute("class", "hide");
+}
 
 document.getElementByClass("button").addEventListener("click", clickAnswer);
 
@@ -104,6 +148,28 @@ function clickAnswer() {
     }
 }
 
+function highscore() {
+  var initials = initialsEl.value.trim();
+
+  if (initials !== "") {
+
+    var scores =
+      JSON.parse(window.localStorage.getItem("scores")) || [];
+    var newScore = {
+      score: time,
+      initials: initials
+    };
+    scores.push(newScore);
+    window.localStorage.setItem("scores", JSON.stringify(scores));
+    window.location.href = "scores.html";
+  }
+}
+
+function scoreListener(event) {
+  if (event.key === "Enter") {
+    highscore();
+  }
+}
 console.log(countdownDisplay);
 console.log(questions[0].title);
 console.log(startButton);
